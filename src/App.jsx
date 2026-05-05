@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 
 const SUPABASE_URL = "https://qfxdmcfshtcfikhoqwlq.supabase.co";
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFmeGRtY2ZzaHRjZmlraG9xd2xxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc5NzExMjYsImV4cCI6MjA5MzU0NzEyNn0.vekMOhwDncvSYJ1CED3XPjqWiN_GBYmgYyKOpPbtTOs";
+const APP_URL = "https://spesapp-olive.vercel.app";
 
 const api = async (path, opts = {}) => {
   const res = await fetch(SUPABASE_URL + "/rest/v1/" + path, {
@@ -56,9 +57,7 @@ function HomeView({ onEnter }) {
   const [mode, setMode] = useState("owner");
   const [loading, setLoading] = useState(false);
   const [msg, setMsg] = useState("");
-
   const handleOwner = () => { if (!email.trim()) return setMsg("Inserisci la tua email"); onEnter({ email: email.trim(), role: "owner" }); };
-
   const handleMember = async () => {
     if (!token.trim()) return setMsg("Inserisci il token");
     setLoading(true); setMsg("");
@@ -71,18 +70,17 @@ function HomeView({ onEnter }) {
     } catch(e) { setMsg("Errore: " + e.message); }
     finally { setLoading(false); }
   };
-
   return (
-    <div style={{ minHeight: "100vh", background: "linear-gradient(135deg,#667eea,#764ba2)", display: "flex", alignItems: "center", justifyContent: "center", padding: 20 }}>
-      <div style={{ background: "white", borderRadius: 24, padding: 40, maxWidth: 400, width: "100%", boxShadow: "0 20px 60px rgba(0,0,0,.2)" }}>
-        <div style={{ textAlign: "center", marginBottom: 32 }}>
-          <div style={{ fontSize: 48 }}>💸</div>
-          <h1 style={{ margin: 0, fontSize: 28, fontWeight: 800 }}>SpesApp</h1>
-          <p style={{ margin: "8px 0 0", color: "#666", fontSize: 14 }}>Spese condivise, semplici e trasparenti</p>
+    <div style={{ minHeight:"100vh", background:"linear-gradient(135deg,#667eea,#764ba2)", display:"flex", alignItems:"center", justifyContent:"center", padding:20 }}>
+      <div style={{ background:"white", borderRadius:24, padding:40, maxWidth:400, width:"100%", boxShadow:"0 20px 60px rgba(0,0,0,.2)" }}>
+        <div style={{ textAlign:"center", marginBottom:32 }}>
+          <div style={{ fontSize:48 }}>💸</div>
+          <h1 style={{ margin:0, fontSize:28, fontWeight:800 }}>SpesApp</h1>
+          <p style={{ margin:"8px 0 0", color:"#666", fontSize:14 }}>Spese condivise, semplici e trasparenti</p>
         </div>
-        <div style={{ display: "flex", gap: 8, marginBottom: 24 }}>
+        <div style={{ display:"flex", gap:8, marginBottom:24 }}>
           {["owner","member"].map(m => (
-            <button key={m} onClick={() => setMode(m)} style={{ flex:1, padding:"10px 0", borderRadius:12, border:"2px solid", borderColor: mode===m?"#667eea":"#e5e7eb", background: mode===m?"#667eea":"white", color: mode===m?"white":"#666", fontWeight:600, cursor:"pointer", fontSize:13 }}>
+            <button key={m} onClick={() => setMode(m)} style={{ flex:1, padding:"10px 0", borderRadius:12, border:"2px solid", borderColor:mode===m?"#667eea":"#e5e7eb", background:mode===m?"#667eea":"white", color:mode===m?"white":"#666", fontWeight:600, cursor:"pointer", fontSize:13 }}>
               {m==="owner"?"👑 Sono il creatore":"🔗 Ho un invito"}
             </button>
           ))}
@@ -164,7 +162,6 @@ function ProjectView({ project, ownerEmail, onBack }) {
   const [tab, setTab] = useState("spese");
   const [members, setMembers] = useState([]); const [expenses, setExpenses] = useState([]); const [loading, setLoading] = useState(true);
   const [showAddExpense, setShowAddExpense] = useState(false); const [showInvite, setShowInvite] = useState(false);
-
   const reload = async () => {
     const [m, e] = await Promise.all([
       api("project_members?project_id=eq."+project.id+"&accepted=eq.true"),
@@ -173,12 +170,10 @@ function ProjectView({ project, ownerEmail, onBack }) {
     setMembers(m||[]); setExpenses(e||[]); setLoading(false);
   };
   useEffect(()=>{ reload(); },[]);
-
   const balances = calcBalances(members, expenses);
   const settlements = calcSettlements(balances);
   const total = expenses.reduce((s,e)=>s+parseFloat(e.amount),0);
   const tabs = [{key:"spese",label:"💳 Spese"},{key:"saldi",label:"⚖️ Saldi"},{key:"membri",label:"👥 Membri"}];
-
   return (
     <div style={{ minHeight:"100vh", background:"#f8f9ff", maxWidth:480, margin:"0 auto" }}>
       <div style={{ background:"linear-gradient(135deg,#667eea,#764ba2)", padding:"20px 20px 30px", color:"white" }}>
@@ -189,7 +184,7 @@ function ProjectView({ project, ownerEmail, onBack }) {
       </div>
       <div style={{ display:"flex", background:"white", boxShadow:"0 2px 8px rgba(0,0,0,.06)" }}>
         {tabs.map(t=>(
-          <button key={t.key} onClick={()=>setTab(t.key)} style={{ flex:1, padding:"14px 0", border:"none", background:"none", borderBottom: tab===t.key?"3px solid #667eea":"3px solid transparent", color: tab===t.key?"#667eea":"#888", fontWeight:600, cursor:"pointer", fontSize:13 }}>{t.label}</button>
+          <button key={t.key} onClick={()=>setTab(t.key)} style={{ flex:1, padding:"14px 0", border:"none", background:"none", borderBottom:tab===t.key?"3px solid #667eea":"3px solid transparent", color:tab===t.key?"#667eea":"#888", fontWeight:600, cursor:"pointer", fontSize:13 }}>{t.label}</button>
         ))}
       </div>
       <div style={{ padding:20 }}>
@@ -215,7 +210,7 @@ function ProjectView({ project, ownerEmail, onBack }) {
             {members.map(m=>{ const b=balances[m.email]||0; return (
               <div key={m.email} style={{ background:"white", borderRadius:12, padding:"14px 16px", marginBottom:8, boxShadow:"0 2px 8px rgba(0,0,0,.05)", display:"flex", justifyContent:"space-between", alignItems:"center" }}>
                 <div><p style={{ margin:0, fontWeight:600 }}>{m.name||m.email}</p><p style={{ margin:0, fontSize:12, color:"#888" }}>{m.email}</p></div>
-                <span style={{ fontWeight:800, fontSize:16, color: b>=0?"#38a169":"#e53e3e" }}>{b>=0?"+":""}€{b.toFixed(2)}</span>
+                <span style={{ fontWeight:800, fontSize:16, color:b>=0?"#38a169":"#e53e3e" }}>{b>=0?"+":""}€{b.toFixed(2)}</span>
               </div>
             );})}
             {settlements.length>0 && (<>
@@ -247,9 +242,9 @@ function ProjectView({ project, ownerEmail, onBack }) {
 }
 
 function AddExpenseModal({ project, members, onClose, userEmail }) {
-  const [desc, setDesc] = useState(""); const [amount, setAmount] = useState(""); 
+  const [desc, setDesc] = useState(""); const [amount, setAmount] = useState("");
   const [paidBy, setPaidBy] = useState(userEmail||(members[0]?.email||""));
-  const [splitAmong, setSplitAmong] = useState(members.map(m=>m.email)); 
+  const [splitAmong, setSplitAmong] = useState(members.map(m=>m.email));
   const [loading, setLoading] = useState(false); const [msg, setMsg] = useState("");
   const toggle = email => setSplitAmong(prev => prev.includes(email) ? prev.filter(e=>e!==email) : [...prev,email]);
   const save = async () => {
@@ -292,7 +287,7 @@ function AddExpenseModal({ project, members, onClose, userEmail }) {
 }
 
 function InviteModal({ project, onClose }) {
-  const [email, setEmail] = useState(""); const [name, setName] = useState(""); 
+  const [email, setEmail] = useState(""); const [name, setName] = useState("");
   const [loading, setLoading] = useState(false); const [result, setResult] = useState(null); const [msg, setMsg] = useState("");
   const invite = async () => {
     if (!email.trim()) return setMsg("Inserisci email");
@@ -311,7 +306,9 @@ function InviteModal({ project, onClose }) {
     }
     finally { setLoading(false); }
   };
-  const msgText = result ? 'Sei stato invitato al progetto "'+project.name+'" su SpesApp!\n\nIl tuo token di accesso è:\n'+result.token+'\n\nApri SpesApp, scegli "Ho un invito" e incolla questo token.' : "";
+  const msgText = result
+    ? 'Sei stato invitato al progetto "' + project.name + '" su SpesApp!\n\n👉 Apri l\'app qui: ' + APP_URL + '\n\nScegli "Ho un invito" e inserisci questo token:\n' + result.token
+    : "";
   return (
     <div style={{ position:"fixed", inset:0, background:"rgba(0,0,0,.5)", display:"flex", alignItems:"flex-end", zIndex:100 }}>
       <div style={{ background:"white", borderRadius:"24px 24px 0 0", padding:24, width:"100%", maxWidth:480, margin:"0 auto" }}>
@@ -344,14 +341,12 @@ export default function App() {
   const [session, setSession] = useState(null);
   const [view, setView] = useState("home");
   const [selectedProject, setSelectedProject] = useState(null);
-
   const handleEnter = (s) => {
     setSession(s);
     if (s.role==="member"&&s.projectId) {
       api("projects?id=eq."+s.projectId).then(data=>{ if(data&&data[0]){ setSelectedProject(data[0]); setView("project"); } });
     } else { setView("projects"); }
   };
-
   if (view==="home") return <HomeView onEnter={handleEnter} />;
   if (view==="projects") return <ProjectListView ownerEmail={session.email} onSelect={p=>{setSelectedProject(p);setView("project");}} onNew={()=>setView("newProject")} />;
   if (view==="newProject") return <NewProjectView ownerEmail={session.email} onBack={()=>setView("projects")} onCreated={p=>{setSelectedProject(p);setView("project");}} />;
