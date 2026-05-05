@@ -5,13 +5,7 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 
 const api = async (path, opts = {}) => {
   const res = await fetch(SUPABASE_URL + "/rest/v1/" + path, {
-    headers: {
-      apikey: SUPABASE_KEY,
-      Authorization: "Bearer " + SUPABASE_KEY,
-      "Content-Type": "application/json",
-      Prefer: "return=representation",
-      ...opts.headers,
-    },
+    headers: { apikey: SUPABASE_KEY, Authorization: "Bearer " + SUPABASE_KEY, "Content-Type": "application/json", Prefer: "return=representation", ...opts.headers },
     ...opts,
   });
   if (!res.ok) { const err = await res.text(); throw new Error(err); }
@@ -54,9 +48,7 @@ function nameFor(email, members) {
   return m?.name || email;
 }
 
-const btn = (extra = {}) => ({
-  border: "none", borderRadius: 12, fontWeight: 700, cursor: "pointer", fontSize: 15, ...extra
-});
+const btn = (extra = {}) => ({ border: "none", borderRadius: 12, fontWeight: 700, cursor: "pointer", fontSize: 15, ...extra });
 
 function HomeView({ onEnter }) {
   const [email, setEmail] = useState("");
@@ -77,7 +69,7 @@ function HomeView({ onEnter }) {
       if (!member.accepted) await api("project_members?id=eq." + member.id, { method: "PATCH", body: JSON.stringify({ accepted: true, joined_at: new Date().toISOString() }) });
       onEnter({ email: member.email, role: "member", projectId: member.project_id });
     } catch(e) { setMsg("Errore: " + e.message); }
-    setLoading(false);
+    finally { setLoading(false); }
   };
 
   return (
@@ -95,21 +87,17 @@ function HomeView({ onEnter }) {
             </button>
           ))}
         </div>
-        {mode==="owner" ? (
-          <>
-            <input value={email} onChange={e=>setEmail(e.target.value)} placeholder="mario@email.com" onKeyDown={e=>e.key==="Enter"&&handleOwner()}
-              style={{ width:"100%", padding:"12px 16px", borderRadius:12, border:"1.5px solid #e5e7eb", fontSize:15, boxSizing:"border-box" }} />
-            <button onClick={handleOwner} style={{ ...btn({width:"100%",marginTop:12,padding:"14px 0",background:"linear-gradient(135deg,#667eea,#764ba2)",color:"white",fontSize:16}) }}>Accedi →</button>
-          </>
-        ) : (
-          <>
-            <input value={token} onChange={e=>setToken(e.target.value)} placeholder="token di invito" onKeyDown={e=>e.key==="Enter"&&handleMember()}
-              style={{ width:"100%", padding:"12px 16px", borderRadius:12, border:"1.5px solid #e5e7eb", fontSize:13, boxSizing:"border-box", fontFamily:"monospace" }} />
-            <button onClick={handleMember} disabled={loading} style={{ ...btn({width:"100%",marginTop:12,padding:"14px 0",background:"linear-gradient(135deg,#667eea,#764ba2)",color:"white",fontSize:16}) }}>
-              {loading?"...":"Entra nel progetto →"}
-            </button>
-          </>
-        )}
+        {mode==="owner" ? (<>
+          <input value={email} onChange={e=>setEmail(e.target.value)} placeholder="mario@email.com" onKeyDown={e=>e.key==="Enter"&&handleOwner()}
+            style={{ width:"100%", padding:"12px 16px", borderRadius:12, border:"1.5px solid #e5e7eb", fontSize:15, boxSizing:"border-box" }} />
+          <button onClick={handleOwner} style={{ ...btn({width:"100%",marginTop:12,padding:"14px 0",background:"linear-gradient(135deg,#667eea,#764ba2)",color:"white",fontSize:16}) }}>Accedi →</button>
+        </>) : (<>
+          <input value={token} onChange={e=>setToken(e.target.value)} placeholder="token di invito" onKeyDown={e=>e.key==="Enter"&&handleMember()}
+            style={{ width:"100%", padding:"12px 16px", borderRadius:12, border:"1.5px solid #e5e7eb", fontSize:13, boxSizing:"border-box", fontFamily:"monospace" }} />
+          <button onClick={handleMember} disabled={loading} style={{ ...btn({width:"100%",marginTop:12,padding:"14px 0",background:"linear-gradient(135deg,#667eea,#764ba2)",color:"white",fontSize:16}) }}>
+            {loading?"...":"Entra nel progetto →"}
+          </button>
+        </>)}
         {msg && <p style={{ marginTop:12, color:"#e53e3e", fontSize:13, textAlign:"center" }}>{msg}</p>}
       </div>
     </div>
@@ -149,7 +137,7 @@ function NewProjectView({ ownerEmail, onCreated, onBack }) {
       await api("project_members", { method:"POST", body: JSON.stringify({ project_id:data[0].id, email:ownerEmail, name:ownerEmail.split("@")[0], accepted:true, joined_at:new Date().toISOString() }) });
       onCreated(data[0]);
     } catch(e) { setMsg("Errore: "+e.message); }
-    setLoading(false);
+    finally { setLoading(false); }
   };
   return (
     <div style={{ minHeight:"100vh", background:"#f8f9ff", padding:20, maxWidth:480, margin:"0 auto" }}>
@@ -259,8 +247,10 @@ function ProjectView({ project, ownerEmail, onBack }) {
 }
 
 function AddExpenseModal({ project, members, onClose, userEmail }) {
-  const [desc, setDesc] = useState(""); const [amount, setAmount] = useState(""); const [paidBy, setPaidBy] = useState(userEmail||(members[0]?.email||""));
-  const [splitAmong, setSplitAmong] = useState(members.map(m=>m.email)); const [loading, setLoading] = useState(false); const [msg, setMsg] = useState("");
+  const [desc, setDesc] = useState(""); const [amount, setAmount] = useState(""); 
+  const [paidBy, setPaidBy] = useState(userEmail||(members[0]?.email||""));
+  const [splitAmong, setSplitAmong] = useState(members.map(m=>m.email)); 
+  const [loading, setLoading] = useState(false); const [msg, setMsg] = useState("");
   const toggle = email => setSplitAmong(prev => prev.includes(email) ? prev.filter(e=>e!==email) : [...prev,email]);
   const save = async () => {
     if (!desc.trim()) return setMsg("Inserisci descrizione");
@@ -272,7 +262,7 @@ function AddExpenseModal({ project, members, onClose, userEmail }) {
       await api("expenses", { method:"POST", body: JSON.stringify({ project_id:project.id, description:desc.trim(), amount:parseFloat(amount), paid_by_email:paidBy, paid_by_name:payer?.name||paidBy, split_among:splitAmong.map(e=>{ const m=members.find(x=>x.email===e); return {email:e,name:m?.name||e}; }) }) });
       onClose();
     } catch(e) { setMsg("Errore: "+e.message); }
-    setLoading(false);
+    finally { setLoading(false); }
   };
   return (
     <div style={{ position:"fixed", inset:0, background:"rgba(0,0,0,.5)", display:"flex", alignItems:"flex-end", zIndex:100 }}>
@@ -302,17 +292,26 @@ function AddExpenseModal({ project, members, onClose, userEmail }) {
 }
 
 function InviteModal({ project, onClose }) {
-  const [email, setEmail] = useState(""); const [name, setName] = useState(""); const [loading, setLoading] = useState(false); const [result, setResult] = useState(null); const [msg, setMsg] = useState("");
+  const [email, setEmail] = useState(""); const [name, setName] = useState(""); 
+  const [loading, setLoading] = useState(false); const [result, setResult] = useState(null); const [msg, setMsg] = useState("");
   const invite = async () => {
     if (!email.trim()) return setMsg("Inserisci email");
     setLoading(true); setMsg("");
     try {
       const data = await api("project_members", { method:"POST", body: JSON.stringify({ project_id:project.id, email:email.trim(), name:name.trim()||email.split("@")[0] }) });
       setResult(data[0]);
-    } catch(e) { if(e.message.includes("unique")) setMsg("Già invitato"); else setMsg("Errore: "+e.message); }
-    setLoading(false);
+    } catch(e) {
+      if (e.message.includes("unique")) {
+        try {
+          const existing = await api("project_members?project_id=eq."+project.id+"&email=eq."+encodeURIComponent(email.trim()));
+          if (existing&&existing[0]) setResult(existing[0]);
+          else setMsg("Errore nel recupero del token");
+        } catch(e2) { setMsg("Errore: "+e2.message); }
+      } else setMsg("Errore: "+e.message);
+    }
+    finally { setLoading(false); }
   };
-  const msg2 = result ? 'Sei stato invitato al progetto "'+project.name+'" su SpesApp!\n\nIl tuo token di accesso è:\n'+result.token+'\n\nApri SpesApp, scegli "Ho un invito" e incolla questo token.' : "";
+  const msgText = result ? 'Sei stato invitato al progetto "'+project.name+'" su SpesApp!\n\nIl tuo token di accesso è:\n'+result.token+'\n\nApri SpesApp, scegli "Ho un invito" e incolla questo token.' : "";
   return (
     <div style={{ position:"fixed", inset:0, background:"rgba(0,0,0,.5)", display:"flex", alignItems:"flex-end", zIndex:100 }}>
       <div style={{ background:"white", borderRadius:"24px 24px 0 0", padding:24, width:"100%", maxWidth:480, margin:"0 auto" }}>
@@ -329,11 +328,11 @@ function InviteModal({ project, onClose }) {
           </div>
         </>) : (<>
           <div style={{ background:"#f0fff4", borderRadius:12, padding:16, marginBottom:16, border:"1px solid #9ae6b4" }}>
-            <p style={{ margin:0, fontWeight:600, color:"#276749" }}>✅ Invito creato!</p>
+            <p style={{ margin:0, fontWeight:600, color:"#276749" }}>✅ Invito {result.accepted?"già esistente — token recuperato":"creato"}!</p>
             <p style={{ margin:"8px 0 0", fontSize:13 }}>Invia questo messaggio a <strong>{email}</strong>:</p>
           </div>
-          <div style={{ background:"#f7fafc", borderRadius:10, padding:14, marginBottom:16, fontFamily:"monospace", fontSize:13, whiteSpace:"pre-wrap", wordBreak:"break-all" }}>{msg2}</div>
-          <button onClick={()=>navigator.clipboard?.writeText(msg2)} style={{ width:"100%", marginBottom:10, padding:"12px 0", borderRadius:10, border:"1.5px solid #667eea", background:"white", color:"#667eea", fontWeight:700, cursor:"pointer" }}>📋 Copia messaggio</button>
+          <div style={{ background:"#f7fafc", borderRadius:10, padding:14, marginBottom:16, fontFamily:"monospace", fontSize:13, whiteSpace:"pre-wrap", wordBreak:"break-all" }}>{msgText}</div>
+          <button onClick={()=>navigator.clipboard?.writeText(msgText)} style={{ width:"100%", marginBottom:10, padding:"12px 0", borderRadius:10, border:"1.5px solid #667eea", background:"white", color:"#667eea", fontWeight:700, cursor:"pointer" }}>📋 Copia messaggio</button>
           <button onClick={onClose} style={{ ...btn({width:"100%",padding:"13px 0",background:"linear-gradient(135deg,#667eea,#764ba2)",color:"white"}) }}>Chiudi</button>
         </>)}
       </div>
